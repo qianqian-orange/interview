@@ -6,32 +6,123 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
   <style>
-    .box {
-      width: 400px;
-      height: 400px;
-      background-color: red;
-    }
-
-    .box1 {
-      width: 100px;
-      height: 100%;
-      background-color: blue;
-      float: left;
-    }
-
-    .box2 {
-      color: white;
-      height: 100%;
-      /* overflow: hidden; */
-      background-color: green;
-      display: flow-root;
-    }
+    
   </style>
 </head>
 <body>
-  <div class="box">
-    <div class="box1"></div>
-    <div class="box2">helloworld</div>
+  <div id="app">
+    <input type="text" v-model.trim="firstname">
+    <h1 @click="handleClick">{{ name }}</h1>
+    <h1>{{fullname}}</h1>
   </div>
+  <script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+  <script>
+    const app = new Vue({
+      el: '#app',
+      data: {
+        firstname: 'jun jia',
+        lastname: 'wu',
+        fullname: 'wu jun jia',
+      },
+      computed: {
+        name() {
+          return this.lastname + ' ' + this.firstname;
+        }
+      },
+      watch: {
+        firstname(value) {
+          if (this.timer) clearTimeout(this.timer);
+          this.timer = setTimeout(() => {
+            this.fullname = this.lastname + ' ' + value;
+          }, 1000);
+        },
+      },
+      methods: {
+        handleClick() {
+          this.firstname = 'hai wen';
+          this.lastname = 'huang';
+        }
+      },
+    });
+
+    var data = {
+      name: 'zhansgan',
+      score: {
+        math: 100
+      }
+    }
+
+    function observe(obj) {
+      if (!obj || typeof obj !== 'object') return;
+
+      Object.keys(obj).forEach(key => {
+        var val = obj[key];
+        observe(val);
+        Object.defineProperty(obj, key, {
+          enumerable: true,
+          configurable: true,
+          get() {
+            console.log('get', val);
+            return val;
+          },
+          set(value) {
+            observe(value);
+            console.log('set', value);
+            val = value;
+          }
+        })
+      })
+    
+    }
+
+    observe(data);
+    console.log(data.name);
+    data.name = 'lisi';
+    console.log(data.name);
+
+    function Person(name) {
+      this.name = name;
+
+      this.eat = function () {
+        console.log('eat');
+      }
+    }
+
+    Person.prototype.sleep = function () {
+      console.log('sleep');
+    }
+
+    const p = new Person('zhangsan');
+    console.dir(Object.create(p));
+    // console.log(p.__proto__);
+
+    var data2 = {
+      hobbies: ['basketball', 'football'],
+      info: {
+        name: 'lisi'
+      }
+    } 
+
+    let handler = {
+      get(target, key) {
+        console.log('get', target[key]);
+        if (typeof target[key] === 'object' && target[key] !== null) {
+          return new Proxy(target[key], handler);
+        }
+        return Reflect.get(target, key);
+      },
+      set(target, key, value) {
+        console.log('set', value);
+        return Reflect.set(target, key, value);
+      }
+    }
+
+    var proxy = new Proxy(data2, handler);
+    console.log(proxy.hobbies);
+    proxy.hobbies[0] = 'pingpong';
+    console.log(proxy.hobbies);
+    proxy.info.age = 10;
+    console.log(proxy);
+  </script>
 </body>
 </html>
